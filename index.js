@@ -10,7 +10,6 @@ import ReactNative, {
 } from 'react-native'
 import SketchCanvas from './src/SketchCanvas'
 import { requestPermissions } from './src/handlePermissions';
-export const LANDSCAPE = Dimensions.get('window').width > Dimensions.get('window').height
 
 export default class RNSketchCanvas extends React.Component {
   static propTypes = {
@@ -206,8 +205,8 @@ export default class RNSketchCanvas extends React.Component {
   render() {
     return (
       <View style={this.props.containerStyle}>
-        <View style={{flexDirection: LANDSCAPE? 'row': null, justifyContent:'space-between'}}>
-          <View style={{width: LANDSCAPE? '50%': null}}>
+        <View style={{justifyContent:'space-between'}}>
+          <View >
             <FlatList
               data={this.props.strokeColors}
               extraData={this.state}
@@ -218,7 +217,7 @@ export default class RNSketchCanvas extends React.Component {
             />
           </View>
           <View style={{flexDirection: 'row', justifyContent: 'flex-start'}}>
-            <View style={{flexDirection: 'row',  justifyContent: 'flex-end', marginRight: LANDSCAPE ? 150 : 10}}>
+            <View style={{flexDirection: 'row',  justifyContent: 'flex-end'}}>
               {this.props.closeComponent && (
                 <TouchableOpacity onPress={() => {
                   this.props.onClosePressed()
