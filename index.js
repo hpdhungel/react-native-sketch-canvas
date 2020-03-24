@@ -6,9 +6,11 @@ import ReactNative, {
   TouchableOpacity,
   FlatList,
   ViewPropTypes,
+  Dimensions
 } from 'react-native'
 import SketchCanvas from './src/SketchCanvas'
 import { requestPermissions } from './src/handlePermissions';
+export const LANDSCAPE = Dimensions.get('window').width > Dimensions.get('window').height
 
 export default class RNSketchCanvas extends React.Component {
   static propTypes = {
@@ -156,7 +158,7 @@ export default class RNSketchCanvas extends React.Component {
       this._sketchCanvas.save(p.imageType, p.transparent, p.folder ? p.folder : '', p.filename, p.includeImage !== false, p.includeText !== false, p.cropToImageSize || false)
     } else {
       const date = new Date()
-      this._sketchCanvas.save('png', false, '', 
+      this._sketchCanvas.save('png', false, '',
         date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + ('0' + date.getDate()).slice(-2) + ' ' + ('0' + date.getHours()).slice(-2) + '-' + ('0' + date.getMinutes()).slice(-2) + '-' + ('0' + date.getSeconds()).slice(-2),
         true, true, false)
     }
@@ -204,44 +206,68 @@ export default class RNSketchCanvas extends React.Component {
   render() {
     return (
       <View style={this.props.containerStyle}>
-        <View style={{ flexDirection: 'row' }}>
-          <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'flex-start' }}>
-            {this.props.closeComponent && (
-              <TouchableOpacity onPress={() => { this.props.onClosePressed() }}>
-                {this.props.closeComponent}
-              </TouchableOpacity>)
-            }
-
-            {this.props.eraseComponent && (
-              <TouchableOpacity onPress={() => { this.setState({ color: '#00000000' }) }}>
-                {this.props.eraseComponent}
-              </TouchableOpacity>)
-            }
+        <View style={{flexDirection: LANDSCAPE? 'row': null, justifyContent:'space-between'}}>
+          <View style={{width: LANDSCAPE? '50%': null}}>
+            <FlatList
+              data={this.props.strokeColors}
+              extraData={this.state}
+              keyExtractor={() => Math.ceil(Math.random() * 10000000).toString()}
+              renderItem={this._renderItem}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+            />
           </View>
-          <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'flex-end' }}>
-            {this.props.strokeWidthComponent && (
-              <TouchableOpacity onPress={() => { this.nextStrokeWidth() }}>
-                {this.props.strokeWidthComponent(this.state.strokeWidth)}
-              </TouchableOpacity>)
-            }
+          <View style={{flexDirection: 'row', justifyContent: 'flex-start'}}>
+            <View style={{flexDirection: 'row',  justifyContent: 'flex-end', marginRight: LANDSCAPE ? 150 : 10}}>
+              {this.props.closeComponent && (
+                <TouchableOpacity onPress={() => {
+                  this.props.onClosePressed()
+                }}>
+                  {this.props.closeComponent}
+                </TouchableOpacity>)
+              }
 
-            {this.props.undoComponent && (
-              <TouchableOpacity onPress={() => { this.props.onUndoPressed(this.undo()) }}>
-                {this.props.undoComponent}
-              </TouchableOpacity>)
-            }
+              {this.props.eraseComponent && (
+                <TouchableOpacity onPress={() => {
+                  this.setState({color: '#00000000'})
+                }}>
+                  {this.props.eraseComponent}
+                </TouchableOpacity>)
+              }
 
-            {this.props.clearComponent && (
-              <TouchableOpacity onPress={() => { this.clear(); this.props.onClearPressed() }}>
-                {this.props.clearComponent}
-              </TouchableOpacity>)
-            }
+              {this.props.strokeWidthComponent && (
+                <TouchableOpacity onPress={() => {
+                  this.nextStrokeWidth()
+                }}>
+                  {this.props.strokeWidthComponent(this.state.strokeWidth)}
+                </TouchableOpacity>)
+              }
 
-            {this.props.saveComponent && (
-              <TouchableOpacity onPress={() => { this.save() }}>
-                {this.props.saveComponent}
-              </TouchableOpacity>)
-            }
+              {this.props.undoComponent && (
+                <TouchableOpacity onPress={() => {
+                  this.props.onUndoPressed(this.undo())
+                }}>
+                  {this.props.undoComponent}
+                </TouchableOpacity>)
+              }
+
+              {this.props.clearComponent && (
+                <TouchableOpacity onPress={() => {
+                  this.clear()
+                  this.props.onClearPressed()
+                }}>
+                  {this.props.clearComponent}
+                </TouchableOpacity>)
+              }
+
+              {this.props.saveComponent && (
+                <TouchableOpacity onPress={() => {
+                  this.save()
+                }}>
+                  {this.props.saveComponent}
+                </TouchableOpacity>)
+              }
+            </View>
           </View>
         </View>
         <SketchCanvas
@@ -260,16 +286,8 @@ export default class RNSketchCanvas extends React.Component {
           permissionDialogTitle={this.props.permissionDialogTitle}
           permissionDialogMessage={this.props.permissionDialogMessage}
         />
-        <View style={{ flexDirection: 'row' }}>
-          <FlatList
-            data={this.props.strokeColors}
-            extraData={this.state}
-            keyExtractor={() => Math.ceil(Math.random() * 10000000).toString()}
-            renderItem={this._renderItem}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-          />
-        </View>
+
+
       </View>
     );
   }
